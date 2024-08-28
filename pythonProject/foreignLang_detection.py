@@ -25,25 +25,13 @@ def detect_foreign_language(text, expected_language='en'):
     try:
         # Detect languages and their probabilities
         lang_probs = detect_langs(cleaned_text)
-        print('line 27 :: ', lang_probs)
 
         # Check if the detected languages include a language other than the expected one
         foreign_lang_detected = any(lang.lang != expected_language for lang in lang_probs)
-        print('line 31 :: ', foreign_lang_detected)
 
-        return foreign_lang_detected, lang_probs
+        return foreign_lang_detected
 
     except LangDetectException:
-        return False, []
+        return False
 
 
-# Example paragraph with mixed languages
-paragraph = "This is a test sentence. это компьютерный портал для гиков. This part is in English."
-
-# Detect foreign language
-foreign_detected, languages = detect_foreign_language(paragraph)
-
-if foreign_detected:
-    print(f"Foreign language detected! Languages found: {languages}")
-else:
-    print("No foreign language detected.")
