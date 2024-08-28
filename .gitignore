@@ -1,0 +1,4 @@
+# temp files
+.DS_store
+.idea/
+__pycache__/
