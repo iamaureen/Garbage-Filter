@@ -1,8 +1,8 @@
 import re
 from better_profanity import profanity
 
-# text = "Crap! What a mother fucking decision."
-#
+# text = "Crap! What a damn decision."
+
 # censored = profanity.censor(text)
 #
 # print(censored)
@@ -27,23 +27,13 @@ def count_badwords(text):
     censored = profanity.censor(text)
     return len(re.findall(r'\*\*\*\*', censored))
 
-def replace_badwords(text):
+def remove_badwords(text):
     """
     Replace all occurrences of '****' in the text with an empty string.
     """
     censored = profanity.censor(text)
     return re.sub(r'\*\*\*\*', '', censored)
-#
-# # Test the functions with an example paragraph
-# paragraph = censored
-#
-# # Count the occurrences of '****'
-# count = count_badwords(paragraph)
-# print(f"Number of occurrences of '****': {count}")
-#
-# # Replace the occurrences of '****'
-# cleaned_text = replace_badwords(paragraph)
-# print(f"Text after replacing '****': {cleaned_text}")
+
 
 
 

@@ -1,14 +1,9 @@
-import nltk
-from nltk.corpus import words
 import re
+from nostril import nonsense
+from spellchecker import SpellChecker
 
-# # Download the words corpus (if not already installed)
-# nltk.download('words')
-
-# Load the list of valid English words
-valid_words = set(words.words())
-
-
+# Initialize the spell checker
+spell = SpellChecker()
 
 def detect_nonsense_words(text):
     """
@@ -20,8 +15,19 @@ def detect_nonsense_words(text):
     Returns:
     - nonsense_words (list): A list of detected nonsense words.
     """
-    words_in_text = re.findall(r'\b\w+\b', text.lower())  # Extract words and convert to lowercase
-    nonsense_words = [word for word in words_in_text if word not in valid_words]
+
+    words = text.split()
+    nonsense_words = []
+
+    for word in words:
+        if len(word) >= 6:
+            if nonsense(word):
+                nonsense_words.append(word)
+        else:
+            # Check shorter words for spelling errors
+            if word not in spell:
+                nonsense_words.append(word)
+
     return nonsense_words
 
 
@@ -51,10 +57,16 @@ def remove_nonsense_words(text):
     - cleaned_text (str): The text with nonsense words removed.
     """
     nonsense_words = detect_nonsense_words(text)
+    print(nonsense_words)
     for word in nonsense_words:
-        text = re.sub(r'\b' + re.escape(word) + r'\b', '', text)
+        text = text.replace(word, "")
     # Clean up extra spaces left after removal
-    cleaned_text = re.sub(' +', ' ', text).strip()
-    return cleaned_text
+    text = re.sub(' +', ' ', text).strip()
+    return text
 
+
+if __name__ == "__main__":
+    studentText = ("This is a sample student summary asft detect)r english Paul and Zeinab and biology Mitochondria.")
+
+    print(detect_nonsense_words(studentText))
 

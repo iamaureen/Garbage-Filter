@@ -3,49 +3,78 @@ import profanity_detection
 import foreignLang_detection
 
 #noise threshold
-threshold = -1
+threshold = 25
 
-cleaned_text = ""
+
+data = {} #return object
 
 def detect_noise(studentText):
+    cleaned_text = ""
 
     #calculate the total number of words in the student essay
     total_words_studentText = len(studentText.split())
 
     # count the total and proportion of nonsense words in the student essay
     count_nonsense_words = nonsense_detection.count_nonsense_words(studentText)
-    proportion_nonsense = count_nonsense_words/total_words_studentText
+    proportion_nonsense = 0; #count_nonsense_words/total_words_studentText
 
     if proportion_nonsense > threshold:
-        #todo: return a dict
-        return "{'pre-processing-status': 'fail', 'code':'Nonsense', 'cleaned_text':''}"
+
+        data["pre-processing_status"] = "fail"
+        data["code"] = "Nonsense"
+        data["cleaned_text"] = ""
+        return data
+
     else:
-        #clean text
-        cleaned_text = nonsense_detection.remove_nonsense_words(studentText)
+        #not enough nonsense words check for profanity
 
         # count the total and proportion of profanity words in the student essay
         count_profanity_words = profanity_detection.count_badwords(studentText)
         proportion_profanity = count_profanity_words / total_words_studentText
 
         if proportion_profanity > threshold:
-            # todo: return a dict
-            return "{'pre-processing-status': 'fail', 'code':'profanity', 'cleaned_text':''}"
+
+            data["pre-processing_status"] = "fail"
+            data["code"] = "Profanity"
+            data["cleaned_text"] = ""
+            return data
+
         else:
-            #clean text
-            cleaned_text = profanity_detection.replace_badwords(cleaned_text)
+
+            # not enough profanity words check for foreign language
 
             # check for foreign language
-            #todo how to calculate the proportion (sentence wise?)
             isForeign = foreignLang_detection.detect_foreign_language(studentText)
 
             if isForeign:
-                # todo: return a dict
-                return "{'pre-processing-status': 'fail', 'code':'profanity', 'cleaned_text':''}"
-            else:
-                #clean text: remove the foreign words
-                clean_text = ""
-                # todo: return a dict
-                return "{'pre-processing-status': 'success', 'code':'', 'cleaned_text':"+cleaned_text+"}"
+
+                #check percentage and decide
+                proportion_foreign = foreignLang_detection.proportion_foreign(studentText)
+
+                if proportion_foreign > threshold:
+
+                    data["pre-processing_status"] = "fail"
+                    data["code"] = "Foreign"
+                    data["cleaned_text"] = ""
+                    return data
+
+    # reached here, may contain some of foreign language, badwords, or nonsense words that does not pass the threshold
+    # but we still want to remove them all
+    cleaned_text = foreignLang_detection.remove_foreign_language(studentText)
+    cleaned_text = profanity_detection.remove_badwords(cleaned_text)
+    cleaned_text = nonsense_detection.remove_nonsense_words(cleaned_text)
+
+    data["pre-processing_status"] = "success"
+    data["code"] = ""
+    data["cleaned_text"] = cleaned_text
+
+    return data
+
+
+
+
+
+
 
 
 
@@ -54,9 +83,6 @@ def detect_relevance(cleaned_text):
     print(cleaned_text)
 
 if __name__ == "__main__":
-    studentText = ("This is a sample student summary kbbggooo lkasokokd damn Zeinab and Paul. "
-                   "we want to detect noise present in this text."
-                   "это компьютерный портал для гиков")
+    studentText = ("damn! kbjbajbd, This is an English sentence.  Another English sentence")
 
-    print(type(detect_noise(studentText)))
-    detect_relevance(cleaned_text)
+    print(detect_noise(studentText))
