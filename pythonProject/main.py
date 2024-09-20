@@ -1,6 +1,7 @@
 import nonsense_detection
 import profanity_detection
 import foreignLang_detection
+import relevance
 
 #noise threshold
 threshold = 25
@@ -16,7 +17,7 @@ def detect_noise(studentText):
 
     # count the total and proportion of nonsense words in the student essay
     count_nonsense_words = nonsense_detection.count_nonsense_words(studentText)
-    proportion_nonsense = 0; #count_nonsense_words/total_words_studentText
+    proportion_nonsense = count_nonsense_words/total_words_studentText
 
     if proportion_nonsense > threshold:
 
@@ -65,7 +66,7 @@ def detect_noise(studentText):
     cleaned_text = nonsense_detection.remove_nonsense_words(cleaned_text)
 
     data["pre-processing_status"] = "success"
-    data["code"] = ""
+    data["code"] = "clean"
     data["cleaned_text"] = cleaned_text
 
     return data
@@ -74,15 +75,46 @@ def detect_noise(studentText):
 
 
 
+def length_check(text, sourceText):
+
+    length_studentText = text.split()
+    length_sourceText = sourceText.split()
+
+    #set the threshold
+    if length_sourceText >= 10:
+        threshold = min(length_sourceText, 20) * .60
+    else:
+        threshold = length_sourceText*.70
+
+    data = {}
+    if length_studentText <= threshold:
+
+        data["pre-processing_status"] = "fail"
+        data["code"] = "Short"
+        data["cleaned_text"] = ""
+
+        return data
 
 
 
 
-def detect_relevance(cleaned_text):
-    #place holder - todo
-    print(cleaned_text)
+def detect_relevance(source_text, summarized_text):
+    print(source_text)
+    print(summarized_text)
+    similarity_score = relevance.check_relevance(source_text, summarized_text)
+    print(f"Relevance Score: {similarity_score:.2f}")
+
 
 if __name__ == "__main__":
-    studentText = ("damn! kbjbajbd, This is an English sentence.  Another English sentence")
+    studentText = "damn! kbjbajbd, This is an English sentence.  Another English sentence"
+    sourceText = "This is an English sentence."
 
+    #detect noise and return clean text
     print(detect_noise(studentText))
+
+    clean_text = detect_noise(studentText)
+
+    detect_relevance(sourceText, clean_text['cleaned_text'])
+
+    #check for lengh
+
